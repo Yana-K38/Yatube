@@ -10,7 +10,6 @@ from django.urls import reverse
 from ..forms import PostForm
 from ..models import Group, Post, User
 
-
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 small_gif = (

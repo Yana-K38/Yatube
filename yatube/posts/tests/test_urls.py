@@ -72,3 +72,4 @@ class PostURLTests(TestCase):
     def test_404_url(self):
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed(response, 'core/404.html')
