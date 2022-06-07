@@ -30,13 +30,10 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(
-            user=request.user,
-            author=author
-        ).exists()
-    else:
-        following = False
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user,
+        author=author
+    ).exists()
     context = {
         'author': author,
         'posts': posts,
@@ -109,9 +106,9 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     """Посты авторов, на кого подписан текущий пользователь."""
-    followers = Follow.objects.filter(user=request.user)
+    Follow.objects.filter(user=request.user)
     posts = Post.objects.filter(
-        author__in=followers.values('author')
+        author__following__user=request.user
     )
     context = {
         'page_obj': paginator_page(posts, request),

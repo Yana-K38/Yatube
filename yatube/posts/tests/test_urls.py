@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
 
 from ..models import Group, Post, User
@@ -45,6 +46,7 @@ class PostURLTests(TestCase):
         self.client = User.objects.create_user(username='NoAuthor')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.client)
+        cache.clear()
 
     def test_urls_uses_correct_template(self):
         """URL используют правильные шаблоны."""
@@ -71,5 +73,5 @@ class PostURLTests(TestCase):
 
     def test_404_url(self):
         response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, 'core/404.html')

@@ -3,6 +3,7 @@ import tempfile
 from http import HTTPStatus
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -54,6 +55,7 @@ class PostCreateFormTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        cache.clear()
 
     def test_post_create_post(self):
         """Валидная форма создает запись в Post."""
@@ -71,7 +73,7 @@ class PostCreateFormTests(TestCase):
         )
         self.assertRedirects(
             response,
-            reverse('posts:profile', kwargs={'username': 'auth'}))
+            reverse('posts:profile', args=(self.user,)))
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertIsNotNone(Post.objects.all()[0].image)
 
@@ -84,7 +86,7 @@ class PostCreateFormTests(TestCase):
             'author': self.authorized_client
         }
         response = self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': '1'}),
+            reverse('posts:post_edit', args=(self.post.id,)),
             data=form_data,
             follow=True
         )
@@ -101,7 +103,7 @@ class PostCreateFormTests(TestCase):
             'text': 'Новый комментарий',
         }
         self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': '1'}),
+            reverse('posts:post_edit', args=(self.post.id,)),
             data=form_data,
             follow=True
         )

@@ -1,14 +1,16 @@
+import shutil
 import tempfile
 
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Page
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Comment, Group, Post
 
 User = get_user_model()
 
@@ -72,6 +74,12 @@ class PostViewsTests(TestCase):
         self.guest_client = Client()
         self.author = Client()
         self.author.force_login(PostViewsTests.user)
+        cache.clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -121,7 +129,7 @@ class PostViewsTests(TestCase):
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.guest_client.get(
-            reverse('posts:profile', kwargs={'username': 'auth'}))
+            reverse('posts:profile', args=(self.user,)))
         first_object = response.context['page_obj'][0]
         post_author_0 = first_object.author
         post_post_0 = first_object.text
@@ -135,7 +143,7 @@ class PostViewsTests(TestCase):
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.authorized_client.get(
-            reverse('posts:post_detail', kwargs={'post_id': '1'}))
+            reverse('posts:post_detail', args=(self.post.id,)))
         self.assertEqual(
             response.context['post'].text,
             PostViewsTests.post.text
@@ -158,7 +166,7 @@ class PostViewsTests(TestCase):
         с правильным контекстом."""
         response = self.author.get(reverse('posts:post_create'))
         response_edit = self.author.get(
-            reverse('posts:post_edit', kwargs={'post_id': '1'}))
+            reverse('posts:post_edit', args=(self.post.id,)))
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
@@ -197,3 +205,29 @@ class PostViewsTests(TestCase):
                 self.assertEqual(
                     response.context['post'].image,
                     PostViewsTests.post.image)
+
+    def test_comment_authorized_client(self):
+        """Комментарий может оставлять только
+        зарегестрированный пользователь."""
+        self.authorized_client.post(
+            reverse('posts:add_comment', args=(self.post.id,)),
+            {
+                'text': 'Новый комментарий'
+            }
+        )
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', args=(self.post.id,))
+        )
+        self.assertContains(
+            response, Comment.objects.get(pk=PostViewsTests.post.id).text
+        )
+        self.guest_client.post(
+            reverse('posts:add_comment', args=(self.post.id,)),
+            {
+                'text': 'Комментарий гостя'
+            }
+        )
+        response = self.guest_client.get(
+            reverse('posts:post_detail', args=(self.post.id,))
+        )
+        self.assertNotContains(response, 'Комментарий гостя')

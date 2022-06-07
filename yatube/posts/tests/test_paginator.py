@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -41,6 +42,7 @@ class PaginatorTest(TestCase):
                 for post in range(12)
             ],
         )
+        cache.clear()
 
     def test_first_page(self):
         for reverse_name in PaginatorTest.pages_names:

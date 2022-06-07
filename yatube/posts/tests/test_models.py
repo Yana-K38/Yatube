@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 
 from ..models import Group, Post
@@ -32,6 +33,7 @@ class PostModelTest(TestCase):
             ('description', 'Напишите описание группы', (cls.group)),
             ('text', 'Введите текст поста', (cls.post)),
         ]
+        cache.clear()
 
     def test_label(self):
         """verbose_name поля совпадает с ожидаемым."""

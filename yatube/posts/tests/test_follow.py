@@ -21,14 +21,15 @@ class FollowTests(TestCase):
 
     def setUp(self):
         self.follower = Client()
-        self.follower.force_login(self.user)
+        self.follower.force_login(FollowTests.user)
         self.unfollower = Client()
-        self.unfollower.force_login(self.user_2)
+        self.unfollower.force_login(FollowTests.user_2)
         self.following = Client()
-        self.following.force_login(self.author)
+        self.following.force_login(FollowTests.author)
 
     def test_follow(self):
-        """Проверка, что пост автора отобразится только у подписчика."""
+        """Проверка, что пост автора отобразится у подписчика
+        и не отобразится у не подписчика."""
         self.follower.get(
             reverse(
                 'posts:profile_follow',
@@ -58,6 +59,8 @@ class FollowTests(TestCase):
         self.assertEqual(Follow.objects.count(), 1)
 
     def test_unfollow_authorized_client(self):
+        """Авторизованный пользователь может отписаться
+        от автора."""
         self.follower.get(
             reverse(
                 'posts:profile_unfollow',
