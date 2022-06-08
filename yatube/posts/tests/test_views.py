@@ -69,7 +69,6 @@ class PostViewsTests(TestCase):
             reverse('posts:group_posts', kwargs={'slug': 'test_slug'}))
 
     def setUp(self):
-        
         self.authorized_client = Client()
         self.authorized_client.force_login(PostViewsTests.client)
         self.guest_client = Client()
