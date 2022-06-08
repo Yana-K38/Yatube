@@ -54,7 +54,7 @@ class PostCreateFormTests(TestCase):
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(PostCreateFormTests.user)
         cache.clear()
 
     def test_post_create_post(self):

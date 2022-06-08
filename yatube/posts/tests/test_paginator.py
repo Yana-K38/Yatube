@@ -28,11 +28,6 @@ class PaginatorTest(TestCase):
             reverse('posts:group_posts', kwargs={'slug': 'test_slug'}),
             reverse('posts:profile', kwargs={'username': 'auth'}),
         )
-
-    def setUp(self):
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
         Post.objects.bulk_create(
             [
                 Post(
@@ -42,6 +37,11 @@ class PaginatorTest(TestCase):
                 for post in range(12)
             ],
         )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
         cache.clear()
 
     def test_first_page(self):

@@ -31,6 +31,7 @@ class PostViewsTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
+        cls.client = User.objects.create_user(username='NoAuthor')
         cls.group = Group.objects.create(
             title='Заголовок тестовой группы',
             slug='test_slug',
@@ -68,9 +69,9 @@ class PostViewsTests(TestCase):
             reverse('posts:group_posts', kwargs={'slug': 'test_slug'}))
 
     def setUp(self):
-        self.client = User.objects.create_user(username='NoAuthor')
+        
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.client)
+        self.authorized_client.force_login(PostViewsTests.client)
         self.guest_client = Client()
         self.author = Client()
         self.author.force_login(PostViewsTests.user)
