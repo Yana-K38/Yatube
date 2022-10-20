@@ -28,10 +28,10 @@ sorl-thumbnail==12.7.0
 
 1. Клонируйте репозиторий и перейдите в него в командной строке:
 ``` 
-    git clone https://github.com/Yana-K38/hw05_final.git
+    git clone https://github.com/Yana-K38/Yatube.git
 ``` 
 ``` 
-    cd hw05_final
+    cd Yatube
 ``` 
 2. Установите виртуальное окружение и активируйте его: 
 ``` 
